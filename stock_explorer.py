@@ -1,9 +1,10 @@
-import datetime, re, sys, os, csv
+import datetime, sys, os, csv
 import yfinance as yf
 import matplotlib.pyplot as plt
 
-all_stocks = []
-summary_statistics_titles = [
+def main():
+    all_stocks = []
+    summary_statistics_titles = [
             "Company: ",
             "Date Range: ",
             "Total Trading Days: ",
@@ -19,9 +20,6 @@ summary_statistics_titles = [
             "Total Return (%): ",
             "Average Daily Volume: "
         ]
-
-def main():
-    global all_stocks
     while True:
         print("-------------------------")
         print("Welcome to Stock Data Explorer!")
@@ -41,7 +39,7 @@ def main():
         print("--------------------------")
 
         if main_menu_choice == 1:
-            stock_data = analyze_stock()
+            stock_data = analyze_stock(all_stocks, summary_statistics_titles)
             while True:
                 print("\n----------------------------------\n")
                 print("Stock Analysis Menu:\n1. Save Data to CSV\n2. Analyze Another Stock\n3. Return to Main Menu\n4. Exit")
@@ -56,11 +54,11 @@ def main():
                     except ValueError:
                         print("Invalid input, please try again.")
                 if stock_choice == 1:
-                    save_one_stock_to_CSV(stock_data)
+                    save_one_stock_to_CSV(stock_data, summary_statistics_titles)
                     continue
                 elif stock_choice == 2:
                     print()
-                    stock_data = analyze_stock()
+                    stock_data = analyze_stock(all_stocks, summary_statistics_titles)
                 elif stock_choice == 3:
                     break
                 else:
@@ -84,12 +82,12 @@ def main():
                     except ValueError:
                         print("Invalid input. Please try again.")
                 if access_choice == 1:
-                    list_stocks()
+                    list_stocks(all_stocks, summary_statistics_titles)
                 elif access_choice == 2:
-                    save_all_to_CSV()
+                    save_all_to_CSV(all_stocks, summary_statistics_titles)
                     continue
                 elif access_choice == 3:
-                    if view_stock_graph():
+                    if view_stock_graph(all_stocks):
                         break
                     continue
                 elif access_choice == 4:
@@ -115,7 +113,7 @@ def main():
         else:
             exit_menu()
 
-def analyze_stock():
+def analyze_stock(all_stocks, summary_statistics_titles):
     """
     Functionality:
     Asks user for stock and date range, validates both(through calling functions), and prints all the statistics
@@ -124,8 +122,6 @@ def analyze_stock():
     Returns:
     - Dictionary with the stock and its statistics
     """
-
-    global all_stocks, summary_statistics_titles
 
     while True:
         if not (stock_ticker := validate_ticker(input("Please enter a stock ticker: ").strip().upper())):
@@ -157,7 +153,12 @@ def analyze_stock():
         for i in range(len(summary_statistics)):
             print(f"{summary_statistics_titles[i]}{summary_statistics[f'stat{i+1}']}")
         
-        #add code to only append if stock with the same date range isn't already in the array
+        if all_stocks:
+            for stock in all_stocks:
+                if (stock["stat1"] == summary_statistics["stat1"] and
+                    stock["stat2"] == summary_statistics["stat2"]):
+                    return summary_statistics
+                
         all_stocks.append(summary_statistics)
 
         return summary_statistics
@@ -165,7 +166,7 @@ def analyze_stock():
 def validate_date(d):
     """
     Functionality:
-    Validates the date entered with regex
+    Validates the date entered by user
 
     Returns:
     - None if the user enters an invalid date
@@ -173,19 +174,9 @@ def validate_date(d):
     """
 
     try:
-        if matches := re.search("^([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9])$", d, re.IGNORECASE):
-            if not 1<=int(matches.group(2))<=12:
-                print("Invalid Month")
-                return None
-            if not 1<=int(matches.group(3))<=31:
-                print("Invalid Day")
-                return None
-            return datetime.date(int(matches.group(1)), int(matches.group(2)), int(matches.group(3)))
+        return datetime.datetime.strptime(d, "%Y-%m-%d").date()
     except ValueError:
-        print("Invalid Date")
-        return None
-    else:
-        print("Invalid Date")
+        print("Invalid date format or invalid calendar date.")
         return None
 
 def validate_ticker(t):
@@ -260,7 +251,7 @@ def stock_summary_statistics(ticker, start_date, end_date):
 
     return sum_stats
 
-def save_one_stock_to_CSV(sum_stats):
+def save_one_stock_to_CSV(sum_stats, summary_statistics_titles):
     """
     Functionality:
     Saves the current stock being analyzed to its own CSV file with its statistics
@@ -270,8 +261,6 @@ def save_one_stock_to_CSV(sum_stats):
     - None if the user attempts the same stock with the same date range twice
     - None if the function executes in its entirety
     """
-
-    global summary_statistics_titles
 
     cleaned_titles = [title.strip(": ").lower().replace(" ", "_") for title in summary_statistics_titles]
     filename = f"{sum_stats['stat1'].split(' ')[0]}_{sum_stats['stat2'].replace(' ', '_')}.csv"
@@ -304,7 +293,7 @@ def save_one_stock_to_CSV(sum_stats):
     print("\n.....Saving.....\n")
     print(f"Data saved to {filename}")
 
-def list_stocks():
+def list_stocks(all_stocks, summary_statistics_titles):
     """
     Functionality:
     Accesses all analyzed stocks so far and prints them along with all their statistics
@@ -313,14 +302,13 @@ def list_stocks():
     - None if the function executes in its entirety
     """
 
-    global all_stocks, summary_statistics_titles
     print(f"\nAll Analyzed Stocks:\n-----****-----")
     for stock in all_stocks:
         for i in range(len(stock)):
             print(f"{summary_statistics_titles[i]}{stock[f'stat{i+1}']}")
         print("--\n")
 
-def save_all_to_CSV():
+def save_all_to_CSV(all_stocks, summary_statistics_titles):
     """
     Functionality:
     Accesses all analyzed stocks so far and their statistics and saves them to a CSV file
@@ -330,7 +318,6 @@ def save_all_to_CSV():
     - None
     """
 
-    global all_stocks, summary_statistics_titles
     rows = []
     
     cleaned_titles = [title.strip(": ").lower().replace(" ", "_") for title in summary_statistics_titles]
@@ -363,7 +350,7 @@ def save_all_to_CSV():
     print("\n.....Saving.....\n")
     print(f"Data saved to {filename}")
 
-def view_stock_graph():
+def view_stock_graph(all_stocks):
     """
     Functionality:
     Allows the user to select and graph a statistic for a previously analyzed stock.
@@ -373,8 +360,6 @@ def view_stock_graph():
     - None if they return to the stock access menu or complete a graph
     - Exits the program if the user chooses to exit
     """
-
-    global all_stocks, summary_statistics_titles
     
     print("---------------\nBelow are all of the stocks you have analyzed:")
     for i in range(len(all_stocks)):
@@ -461,7 +446,7 @@ def exit_menu():
     Prompts user for certainty over leaving
 
     Returns:
-    - None if cancels
+    - None if user cancels
     - calls sys.exit() if user confirms
     """
 
