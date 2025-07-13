@@ -1,38 +1,58 @@
-import datetime, sys, os, csv
+"""
+stock_analyzer.py
+
+This module analyzes stock data using yfinance and matplotlib.
+It fetches historical data, calculates summary statistics, and
+visualizes trends in a user-friendly format.
+"""
+
+import datetime
+import sys
+import os
+import csv
 import yfinance as yf
 import matplotlib.pyplot as plt
 
+
 def main():
+    """
+    Functionality:
+    Main function that collates all code and calls functions.
+    This function has most or all menus part of the program.
+    """
     all_stocks = []
     summary_statistics_titles = [
-            "Company: ",
-            "Date Range: ",
-            "Total Trading Days: ",
-            "Opening Price: ",
-            "Closing Price: ",
-            "Average Closing Price: ",
-            "Highest Closing Price: ",
-            "Highest Intraday Price: ",
-            "Lowest Closing Price: ",
-            "Lowest Intraday Price: ",
-            "Daily Price Volatility: ",
-            "Annualized Price Volatility: ",
-            "Total Return (%): ",
-            "Average Daily Volume: "
-        ]
+        "Company: ",
+        "Date Range: ",
+        "Total Trading Days: ",
+        "Opening Price: ",
+        "Closing Price: ",
+        "Average Closing Price: ",
+        "Highest Closing Price: ",
+        "Highest Intraday Price: ",
+        "Lowest Closing Price: ",
+        "Lowest Intraday Price: ",
+        "Daily Price Volatility: ",
+        "Annualized Price Volatility: ",
+        "Total Return (%): ",
+        "Average Daily Volume: ",
+    ]
     while True:
         print("-------------------------")
         print("Welcome to Stock Data Explorer!")
 
-        print("\nMenu:\n1. Analyze a Stock\n2. Access All Analyzed Stocks\n3. User Guide\n4. Exit\n---------------")
+        print(
+            "\nMenu:\n1. Analyze a Stock\n2. Access All Analyzed Stocks\n3. User Guide\n4. Exit\n---------------"
+        )
 
         while True:
             try:
-                main_menu_choice = int(input("What would you like to do? (1, 2, 3, 4): ").strip())
-                if 1<=main_menu_choice<=4:
+                main_menu_choice = int(
+                    input("What would you like to do? (1, 2, 3, 4): ").strip()
+                )
+                if 1 <= main_menu_choice <= 4:
                     break
-                else:
-                    print("Invalid input, please choose between 1 and 4")
+                print("Invalid input, please choose between 1 and 4")
             except ValueError:
                 print("Invalid input, please try again.")
 
@@ -42,19 +62,22 @@ def main():
             stock_data = analyze_stock(all_stocks, summary_statistics_titles)
             while True:
                 print("\n----------------------------------\n")
-                print("Stock Analysis Menu:\n1. Save Data to CSV\n2. Analyze Another Stock\n3. Return to Main Menu\n4. Exit")
+                print(
+                    "Stock Analysis Menu:\n1. Save Data to CSV\n2. Analyze Another Stock\n3. Return to Main Menu\n4. Exit"
+                )
 
                 while True:
                     try:
-                        stock_choice = int(input("What would you like to do? (1, 2, 3, 4): ").strip())
-                        if 1<=stock_choice<=4:
+                        stock_choice = int(
+                            input("What would you like to do? (1, 2, 3, 4): ").strip()
+                        )
+                        if 1 <= stock_choice <= 4:
                             break
-                        else:
-                            print("Invalid input, please choose between 1 and 4")
+                        print("Invalid input, please choose between 1 and 4")
                     except ValueError:
                         print("Invalid input, please try again.")
                 if stock_choice == 1:
-                    save_one_stock_to_CSV(stock_data, summary_statistics_titles)
+                    save_one_stock_to_csv(stock_data, summary_statistics_titles)
                     continue
                 elif stock_choice == 2:
                     print()
@@ -66,16 +89,24 @@ def main():
 
         elif main_menu_choice == 2:
             if not all_stocks:
-                print("\n**You must first analyze one or more stocks before you can access them.**\n")
+                print(
+                    "\n**You must first analyze one or more stocks before you can access them.**\n"
+                )
                 continue
 
             while True:
-                print("\nStock Access Menu:\n1. List All Analyzed Stocks\n2. Save All Analyzed Stocks to CSV\n3. View Graphs of Individual Analyzed Stocks\n4. Return to Main Menu\n5. Exit\n---------------")
-                
+                print(
+                    "\nStock Access Menu:\n1. List All Analyzed Stocks\n2. Save All Analyzed Stocks to CSV\n3. View Graphs of Individual Analyzed Stocks\n4. Return to Main Menu\n5. Exit\n---------------"
+                )
+
                 while True:
                     try:
-                        access_choice = int(input("What would you like to do? (1, 2, 3, 4, or 5): ").strip())
-                        if 1<=access_choice<=5:
+                        access_choice = int(
+                            input(
+                                "What would you like to do? (1, 2, 3, 4, or 5): "
+                            ).strip()
+                        )
+                        if 1 <= access_choice <= 5:
                             break
                         else:
                             print("Invalid input, please choose between 1 and 4")
@@ -84,7 +115,7 @@ def main():
                 if access_choice == 1:
                     list_stocks(all_stocks, summary_statistics_titles)
                 elif access_choice == 2:
-                    save_all_to_CSV(all_stocks, summary_statistics_titles)
+                    save_all_to_csv(all_stocks, summary_statistics_titles)
                     continue
                 elif access_choice == 3:
                     if view_stock_graph(all_stocks):
@@ -113,6 +144,7 @@ def main():
         else:
             exit_menu()
 
+
 def analyze_stock(all_stocks, summary_statistics_titles):
     """
     Functionality:
@@ -124,44 +156,67 @@ def analyze_stock(all_stocks, summary_statistics_titles):
     """
 
     while True:
-        if not (stock_ticker := validate_ticker(input("Please enter a stock ticker: ").strip().upper())):
+        if not (
+            stock_ticker := validate_ticker(
+                input("Please enter a stock ticker: ").strip().upper()
+            )
+        ):
             continue
-        if not (start_date := validate_date(input("Please enter a start date(YYYY-MM-DD): ").strip())):
+        if not (
+            start_date := validate_date(
+                input("Please enter a start date(YYYY-MM-DD): ").strip()
+            )
+        ):
             continue
-        if not (end_date := validate_date(input("Please enter an end date(YYYY-MM-DD): ").strip())):
+        if not (
+            end_date := validate_date(
+                input("Please enter an end date(YYYY-MM-DD): ").strip()
+            )
+        ):
             continue
 
         print("\n.....Validating.....\n")
 
-        if start_date>=end_date:
+        if start_date >= end_date:
             print("Start date must occur before end date")
             continue
-        if start_date>datetime.date.today() or end_date>datetime.date.today():
+        if start_date > datetime.date.today() or end_date > datetime.date.today():
             print("Date(s) entered cannot be in the future.")
             continue
 
         print("-----------------------------")
-        if not (summary_statistics := stock_summary_statistics(stock_ticker, start_date, end_date)):
-            print("There is no data available for this date range.\nPlease try again with another set of dates.\n-----------------------------")
+        if not (
+            summary_statistics := stock_summary_statistics(
+                stock_ticker, start_date, end_date
+            )
+        ):
+            print(
+                "There is no data available for this date range.\nPlease try again with another set of dates.\n-----------------------------"
+            )
             continue
 
         print(f"Company: {stock_ticker['ticker']} ({stock_ticker['long_name']})")
         print(f"Valid Date Range: {start_date} to {end_date}")
         print("----------------------------------\n")
-        print("--\n**Note**:\nIf either the start or end date occurs on a day when the market was closed, the soonest succeeding day was chosen.\n--\n")
+        print(
+            "--\n**Note**:\nIf either the start or end date occurs on a day when the market was closed, the soonest succeeding day was chosen.\n--\n"
+        )
 
         for i in range(len(summary_statistics)):
-            print(f"{summary_statistics_titles[i]}{summary_statistics[f'stat{i+1}']}")
-        
+            print(f"{summary_statistics_titles[i]}{summary_statistics[f'stat{i + 1}']}")
+
         if all_stocks:
             for stock in all_stocks:
-                if (stock["stat1"] == summary_statistics["stat1"] and
-                    stock["stat2"] == summary_statistics["stat2"]):
+                if (
+                    stock["stat1"] == summary_statistics["stat1"]
+                    and stock["stat2"] == summary_statistics["stat2"]
+                ):
                     return summary_statistics
-                
+
         all_stocks.append(summary_statistics)
 
         return summary_statistics
+
 
 def validate_date(d):
     """
@@ -179,6 +234,7 @@ def validate_date(d):
         print("Invalid date format or invalid calendar date.")
         return None
 
+
 def validate_ticker(t):
     """
     Functionality:
@@ -190,10 +246,10 @@ def validate_ticker(t):
     """
 
     original_stderr = sys.stderr
-    sys.stderr = open(os.devnull, 'w')
+    sys.stderr = open(os.devnull, "w")
     stock = yf.Ticker(t)
 
-    if not stock.info or stock.info.get("longName") == None:
+    if not stock.info or stock.info.get("longName") is None:
         sys.stderr.close()
         sys.stderr = original_stderr
         print("Entered ticker does not exist.")
@@ -201,7 +257,8 @@ def validate_ticker(t):
 
     sys.stderr.close()
     sys.stderr = original_stderr
-    return {"ticker":t, "long_name": stock.info.get("longName")}
+    return {"ticker": t, "long_name": stock.info.get("longName")}
+
 
 def stock_summary_statistics(ticker, start_date, end_date):
     """
@@ -217,41 +274,44 @@ def stock_summary_statistics(ticker, start_date, end_date):
     stock = yf.Ticker(ticker["ticker"])
     data = stock.history(start=start_date, end=end_date)
     if data.empty:
-        return
+        return None
 
-    """saving ticker to dict"""
+    # saving ticker to dict
     sum_stats["stat1"] = f"{ticker['ticker']} ({ticker['long_name']})"
-    """saving date range to dict"""
+    # saving date range to dict
     sum_stats["stat2"] = f"{data.index[0].date()} to {data.index[-1].date()}"
-    """number of trading days"""
+    # saving number of trading days
     sum_stats["stat3"] = f"{len(data):,}"
-    """saving opening price to dict"""
+    # saving opening price to dict
     sum_stats["stat4"] = f"${data.iloc[0]['Open']:,.2f}"
-    """saving closing price to dict"""
+    # saving closing price to dict
     sum_stats["stat5"] = f"${data.iloc[-1]['Close']:,.2f}"
-    """saving average closing price to dict"""
+    # saving average closing price to dict
     sum_stats["stat6"] = f"${data['Close'].mean():,.2f}"
-    """saving highest closing price to dict"""
+    # saving highest closing price to dict
     sum_stats["stat7"] = f"${data['Close'].max():,.2f}"
-    """saving highest intraday price to dict"""
+    # saving highest intraday price to dict
     sum_stats["stat8"] = f"${data['High'].max():,.2f}"
-    """saving lowest closing price to dict"""
+    # saving lowest closing price to dict
     sum_stats["stat9"] = f"${data['Close'].min():,.2f}"
-    """saving lowest intraday price to dict"""
+    # saving lowest intraday price to dict
     sum_stats["stat10"] = f"${data['Low'].min():,.2f}"
-    """saving daily price volatility to dict"""
+    # saving daily price volatility to dict
     returns = data["Close"].pct_change().dropna()
     sum_stats["stat11"] = f"{returns.std():,.6f}"
-    """saving annualized price volatility to dict"""
-    sum_stats["stat12"] = f"{(returns.std() * (252 ** 0.5)):,.6f}"
-    """saving total return to dict"""
-    sum_stats["stat13"] = f"{((data.iloc[-1]['Close']-data.iloc[0]['Open'])/data.iloc[0]['Open'])*100:,.4f}%"
-    """saving average daily volume to dict"""
+    # saving annualized price volatility to dict
+    sum_stats["stat12"] = f"{(returns.std() * (252**0.5)):,.6f}"
+    # saving total return to dict
+    sum_stats["stat13"] = (
+        f"{((data.iloc[-1]['Close'] - data.iloc[0]['Open']) / data.iloc[0]['Open']) * 100:,.4f}%"
+    )
+    # saving average daily volume to dict
     sum_stats["stat14"] = f"{round(data['Volume'].mean()):,}"
 
     return sum_stats
 
-def save_one_stock_to_CSV(sum_stats, summary_statistics_titles):
+
+def save_one_stock_to_csv(sum_stats, summary_statistics_titles):
     """
     Functionality:
     Saves the current stock being analyzed to its own CSV file with its statistics
@@ -262,15 +322,22 @@ def save_one_stock_to_CSV(sum_stats, summary_statistics_titles):
     - None if the function executes in its entirety
     """
 
-    cleaned_titles = [title.strip(": ").lower().replace(" ", "_") for title in summary_statistics_titles]
-    filename = f"{sum_stats['stat1'].split(' ')[0]}_{sum_stats['stat2'].replace(' ', '_')}.csv"
-    new_row = {title: sum_stats[f"stat{i+1}"] for i, title in enumerate(cleaned_titles)}
+    cleaned_titles = [
+        title.strip(": ").lower().replace(" ", "_")
+        for title in summary_statistics_titles
+    ]
+    filename = (
+        f"{sum_stats['stat1'].split(' ')[0]}_{sum_stats['stat2'].replace(' ', '_')}.csv"
+    )
+    new_row = {
+        title: sum_stats[f"stat{i + 1}"] for i, title in enumerate(cleaned_titles)
+    }
 
     file_exists = False
     duplicate = False
 
     try:
-        with open(filename, "r") as file:
+        with open(filename, "r", encoding="utf-8") as file:
             reader = csv.DictReader(file)
             file_exists = True
             for row in reader:
@@ -281,10 +348,12 @@ def save_one_stock_to_CSV(sum_stats, summary_statistics_titles):
         file_exists = False
 
     if duplicate:
-        print(f"\n--\nStock data for {sum_stats['stat1']} from {sum_stats['stat2']} is already saved in {filename}.\n--")
+        print(
+            f"\n--\nStock data for {sum_stats['stat1']} from {sum_stats['stat2']} is already saved in {filename}.\n--"
+        )
         return
 
-    with open(filename, "a") as file:
+    with open(filename, "a", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=cleaned_titles)
         if not file_exists:
             writer.writeheader()
@@ -292,6 +361,7 @@ def save_one_stock_to_CSV(sum_stats, summary_statistics_titles):
 
     print("\n.....Saving.....\n")
     print(f"Data saved to {filename}")
+
 
 def list_stocks(all_stocks, summary_statistics_titles):
     """
@@ -302,13 +372,14 @@ def list_stocks(all_stocks, summary_statistics_titles):
     - None if the function executes in its entirety
     """
 
-    print(f"\nAll Analyzed Stocks:\n-----****-----")
+    print("\nAll Analyzed Stocks:\n-----****-----")
     for stock in all_stocks:
         for i in range(len(stock)):
-            print(f"{summary_statistics_titles[i]}{stock[f'stat{i+1}']}")
+            print(f"{summary_statistics_titles[i]}{stock[f'stat{i + 1}']}")
         print("--\n")
 
-def save_all_to_CSV(all_stocks, summary_statistics_titles):
+
+def save_all_to_csv(all_stocks, summary_statistics_titles):
     """
     Functionality:
     Accesses all analyzed stocks so far and their statistics and saves them to a CSV file
@@ -319,36 +390,44 @@ def save_all_to_CSV(all_stocks, summary_statistics_titles):
     """
 
     rows = []
-    
-    cleaned_titles = [title.strip(": ").lower().replace(" ", "_") for title in summary_statistics_titles]
 
-    filename=""
+    cleaned_titles = [
+        title.strip(": ").lower().replace(" ", "_")
+        for title in summary_statistics_titles
+    ]
+
+    filename = ""
     while not filename:
         filename = input("Please enter a filename: ").strip()
     if not filename.endswith(".csv"):
-        filename+=".csv"
+        filename += ".csv"
 
     for j in range(len(all_stocks)):
-        rows.append({title: all_stocks[j][f"stat{i+1}"] for i, title in enumerate(cleaned_titles)})
+        rows.append(
+            {
+                title: all_stocks[j][f"stat{i + 1}"]
+                for i, title in enumerate(cleaned_titles)
+            }
+        )
 
     file_exists = False
 
     try:
-        with open(filename, "r") as file:
-            reader = csv.DictReader(file)
+        with open(filename, "r", encoding="utf-8") as file:
             file_exists = True
     except FileNotFoundError:
         file_exists = False
 
-    with open(filename, "a") as file:
+    with open(filename, "a", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=cleaned_titles)
         if not file_exists:
             writer.writeheader()
-        for i in range(len(rows)):
-            writer.writerow(rows[i])
+        for row in rows:
+            writer.writerow(row)
 
     print("\n.....Saving.....\n")
     print(f"Data saved to {filename}")
+
 
 def view_stock_graph(all_stocks):
     """
@@ -357,81 +436,103 @@ def view_stock_graph(all_stocks):
 
     Returns:
     - True if the user chooses to return to the main menu
-    - None if they return to the stock access menu or complete a graph
+    - False if they return to the stock access menu or complete a graph
     - Exits the program if the user chooses to exit
     """
-    
+
     print("---------------\nBelow are all of the stocks you have analyzed:")
     for i in range(len(all_stocks)):
-        print(f"{i+1}. {all_stocks[i]['stat1']} ~ {all_stocks[i]['stat2']}")
-    print(f"{len(all_stocks)+1}. Return to Stock Access Menu\n{len(all_stocks)+2}. Return to Main Menu\n{len(all_stocks)+3}. Exit")
+        print(f"{i + 1}. {all_stocks[i]['stat1']} ~ {all_stocks[i]['stat2']}")
+    print(
+        f"{len(all_stocks) + 1}. Return to Stock Access Menu\n{len(all_stocks) + 2}. Return to Main Menu\n{len(all_stocks) + 3}. Exit"
+    )
 
     print()
 
     while True:
         try:
-            stock_number = int(input("Which stock would you like to view? (Enter the Number): ").strip())
-            if not (1<=stock_number<=len(all_stocks)+3):
-                print(f"Invalid input. You must input a number between 1 and {len(all_stocks)+3}")
+            stock_number = int(
+                input(
+                    "Which stock would you like to view? (Enter the Number): "
+                ).strip()
+            )
+            if not 1 <= stock_number <= len(all_stocks) + 3:
+                print(
+                    f"Invalid input. You must input a number between 1 and {len(all_stocks) + 3}"
+                )
                 continue
         except ValueError:
             print("Invalid input. Please try again.")
             continue
         else:
-            if stock_number == len(all_stocks)+1:
-                return
-            elif stock_number == len(all_stocks)+2:
+            if stock_number == len(all_stocks) + 1:
+                return False
+            if stock_number == len(all_stocks) + 2:
                 return True
-            elif stock_number == len(all_stocks)+3:
+            if stock_number == len(all_stocks) + 3:
                 exit_menu()
                 continue
         break
-    
-    stock = yf.Ticker(all_stocks[stock_number-1]["stat1"].split(" ")[0])
-    start_date, end_date = all_stocks[stock_number-1]["stat2"].split(" to ")
+
+    stock = yf.Ticker(all_stocks[stock_number - 1]["stat1"].split(" ")[0])
+    start_date, end_date = all_stocks[stock_number - 1]["stat2"].split(" to ")
     data = stock.history(start=start_date, end=end_date)
 
     print("\n.....Retrieving Stock.....\n")
 
-    print(f"Available Statistics for {all_stocks[stock_number-1]['stat1']} from {all_stocks[stock_number-1]['stat2']}")
-    print("1. Daily Opening Price\n2. Daily Closing Price\n3. Highest Intraday Price\n4. Lowest Intraday Price\n5. Daily Volume")
+    print(
+        f"Available Statistics for {all_stocks[stock_number - 1]['stat1']} from {all_stocks[stock_number - 1]['stat2']}"
+    )
+    print(
+        "1. Daily Opening Price\n2. Daily Closing Price\n3. Highest Intraday Price\n4. Lowest Intraday Price\n5. Daily Volume"
+    )
 
     while True:
         try:
-            graph_stat = int(input("Which statistic do you want to graph? (1, 2, 3, 4, or 5): ").strip())
-            if 1<=graph_stat<=5:
+            graph_stat = int(
+                input(
+                    "Which statistic do you want to graph? (1, 2, 3, 4, or 5): "
+                ).strip()
+            )
+            if 1 <= graph_stat <= 5:
                 break
-            else:
-                print(f"Invalid Input. Please enter a number between 1 and 5")
+            print("Invalid Input. Please enter a number between 1 and 5")
         except ValueError:
             print("Invalid Input. Please try again.")
-    
-    stat_options = {
-        1: "Open",
-        2: "Close",
-        3: "High",
-        4: "Low",
-        5: "Volume"
-    }
+
+    stat_options = {1: "Open", 2: "Close", 3: "High", 4: "Low", 5: "Volume"}
 
     graph_options = {
         1: "Opening Price",
         2: "Closing Price",
         3: "High Price",
         4: "Low Price",
-        5: "Volume"
+        5: "Volume",
     }
 
     print("\n.....Graphing.....\n")
 
     plt.figure(figsize=(10, 5))
-    if graph_stat !=5:
-        plt.plot(data.index, data[stat_options[graph_stat]], label=graph_options[graph_stat], color="blue")
+    if graph_stat != 5:
+        plt.plot(
+            data.index,
+            data[stat_options[graph_stat]],
+            label=graph_options[graph_stat],
+            color="blue",
+        )
     else:
-        plt.bar(data.index, data[stat_options[graph_stat]], label=graph_options[graph_stat], color="gray", width=0.8)
-    plt.title(f"{all_stocks[stock_number-1]['stat1']} {graph_options[graph_stat]} from {start_date} to {end_date}")
+        plt.bar(
+            data.index,
+            data[stat_options[graph_stat]],
+            label=graph_options[graph_stat],
+            color="gray",
+            width=0.8,
+        )
+    plt.title(
+        f"{all_stocks[stock_number - 1]['stat1']} {graph_options[graph_stat]} from {start_date} to {end_date}"
+    )
     plt.xlabel("Date")
-    if graph_stat !=5:
+    if graph_stat != 5:
         plt.ylabel("Price ($)")
     else:
         plt.ylabel("Volume")
@@ -439,6 +540,8 @@ def view_stock_graph(all_stocks):
     plt.legend()
     plt.tight_layout()
     plt.show()
+    return False
+
 
 def exit_menu():
     """
@@ -450,7 +553,11 @@ def exit_menu():
     - calls sys.exit() if user confirms
     """
 
-    exit_choice = input("Are you sure you wish to exit? All analyzed stocks will be lost [y/N]: ").strip().lower()
+    exit_choice = (
+        input("Are you sure you wish to exit? All analyzed stocks will be lost [y/N]: ")
+        .strip()
+        .lower()
+    )
     while True:
         if exit_choice == "y":
             sys.exit("\n.....Exiting.....\n")
@@ -458,6 +565,7 @@ def exit_menu():
             return
         else:
             exit_choice = input("Invalid input. Please try again: ").strip().lower()
+
 
 if __name__ == "__main__":
     main()
