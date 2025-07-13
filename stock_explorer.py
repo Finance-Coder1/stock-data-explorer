@@ -69,7 +69,9 @@ def main():
                 while True:
                     try:
                         stock_choice = int(
-                            input("What would you like to do? (1, 2, 3, 4): ").strip()
+                            input(
+                                "What would you like to do? (1, 2, 3, or 4): "
+                            ).strip()
                         )
                         if 1 <= stock_choice <= 4:
                             break
@@ -109,7 +111,7 @@ def main():
                         if 1 <= access_choice <= 5:
                             break
                         else:
-                            print("Invalid input, please choose between 1 and 4")
+                            print("Invalid input, please choose between 1 and 5")
                     except ValueError:
                         print("Invalid input. Please try again.")
                 if access_choice == 1:
@@ -401,6 +403,8 @@ def save_all_to_csv(all_stocks, summary_statistics_titles):
         filename = input("Please enter a filename: ").strip()
     if not filename.endswith(".csv"):
         filename += ".csv"
+    if " " in filename:
+        filename = filename.replace(" ", "_")
 
     for j in range(len(all_stocks)):
         rows.append(
